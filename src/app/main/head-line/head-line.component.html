@@ -1,0 +1,38 @@
+<!-- Header -->
+<header class="w-screen h-max p-2 flex justify-between bg-gradient-to-b from-color1 to-color2 overflow-hidden">
+
+    <!-- logo -->
+    <div class="flex flex-none items-center justify-start mr-14">
+        <h1 class="text-2xl font-mainFont italic drop-shadow-md shadow-gray-600 text-lime-900 font-semibold ">
+            FoodReCiPe</h1>
+        <img class="mb-2 " src=" assets/images/recipe-logo.svg">
+
+    </div>
+    <!-- images -->
+    <div class="flex grow items-center justify-around ">
+        <img class="animate-spin" src="assets/images/line.image1.svg">
+        <img class="animate-bounce" src="assets/images/line.image2.svg">
+        <img class="animate-spin" src="assets/images/line.image3.svg">
+        <img class="animate-bounce" src="assets/images/line.image4.svg">
+        <img class="animate-spin" src="assets/images/line.image5.svg">
+    </div>
+    <!-- search field -->
+    <div class="flex grow  items-center  relative">
+        <!-- search info -->
+        <div class="flex  justify-between items-center absolute z-0 p-2 right-14  ">
+            <img src="assets/images/cooker.svg">
+            <p class="font-secondFont text-color4 italic font-bold leading-8 text-xl" [class.unSearchInput]="search"
+                [class.searchInput]="!search">Are
+                you looking for recipe?</p>
+        </div>
+        <!-- search input -->
+        <div class="flex  justify-center items-center  absolute  right-1 ">
+            <input class="w-64 p-2 h-max  bg-gradient-to-t from-color2 to-color3 rounded-xl
+             focus:outline-none focus:ring-2 ring-color1 font-secondFont font-semibold 
+             italic focus:scale-105 transition duration-300 z-10" autocomplete="off" placeholder="Search" type="text"
+                [class.searchInput]="search" [class.unSearchInput]="!search">
+            <img class="p-3 cursor-pointer " src="assets/images/search.svg" (click)="issearch()"
+                [class.iconAnimation]="search" [class.unIconAnimation]="!search">
+        </div>
+    </div>
+</header>

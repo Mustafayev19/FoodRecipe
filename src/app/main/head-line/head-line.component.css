@@ -1,0 +1,77 @@
+.searchInput {
+    /* animation: slideLeft 450ms 1 ease-in-out; */
+    animation: slideLeft 500ms ease-in-out;
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translateX(10%);
+        opacity: 0;
+    }
+
+    50% {
+        transform: translateX(10%);
+        opacity: 0;
+
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+
+}
+
+.unSearchInput {
+    animation: closeAnimation 0.5s ease-in-out;
+    opacity: 0;
+
+}
+
+@keyframes closeAnimation {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(50%);
+
+    }
+}
+
+
+
+.iconAnimation {
+    animation: spin 500ms ease;
+
+}
+
+@keyframes unspin {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+.unIconAnimation {
+    animation: unspin 500ms ease;
+
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

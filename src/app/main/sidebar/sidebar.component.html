@@ -1,0 +1,19 @@
+<!-- aside -->
+<aside class="min-w-full h-max m-2 border-x-2 border-color1 rounded-2xl text-center ">
+    <!-- Menu -->
+    <div class="p-2 mx-2 border-b-2 border-color1 rounded-2xl ">
+        <span class="font-mainFont font-semibold text-2xl px-[2px] " *ngFor="let letter of menu">{{letter}}</span>
+    </div>
+    <!-- Navbar -->
+    <div class="p-1 mx-2">
+        <ul class="p-1" *ngFor="let menuName of menuList">
+            <li class="py-1  m-2 border-y rounded-lg border-color1 shadow-md shadow-color2 cursor-pointer 
+                hover:scale-105 transition duration-300 text-xl font-secondFont italic font-semibold text-color1">
+                {{menuName}}</li>
+
+        </ul>
+    </div>
+
+
+
+</aside>

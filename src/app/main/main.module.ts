@@ -1,23 +1,28 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeadLineComponent } from './head-line/head-line.component';
-import { SidebarComponent } from './sidebar/sidebar.component';
 import { MainComponent } from './main/main.component';
 import { ServicesModule } from '../services/services.module';
+import { RecipeDetailComponent } from './recipe-detail/recipe-detail.component';
+import { MenuComponent } from './menu/menu.component';
+import { RouterModule } from '@angular/router';
 
 
 
 @NgModule({
   declarations: [
     HeadLineComponent,
-    SidebarComponent,
+    MenuComponent,
     MainComponent,
+    RecipeDetailComponent,
+
 
   ],
   imports: [
     CommonModule,
-    ServicesModule
+    ServicesModule,
+    RouterModule
   ],
-  exports: [HeadLineComponent, MainComponent]
+  exports: [HeadLineComponent, MainComponent, MenuComponent, RecipeDetailComponent]
 })
 export class MainModule { }

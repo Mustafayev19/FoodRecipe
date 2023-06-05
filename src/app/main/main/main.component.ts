@@ -8,22 +8,18 @@ import { RecipeService } from 'src/app/services/recipe.service';
   styleUrls: ['./main.component.css']
 })
 export class MainComponent implements OnInit {
-  randomRecipe!: Recipe;
-
+  recipes: Recipe[] = [];
   constructor(private recipeService: RecipeService) { }
 
   ngOnInit() {
-    this.getRecipe();
+    this.getRecipes();
   }
 
-  getRecipe() {
-    this.recipeService.getRandomRecipe().subscribe(
-      (recipe: Recipe) => {
-        this.randomRecipe = recipe;
-      },
-      (error) => {
-        console.error('API Error:', error);
-      }
-    );
+
+
+  getRecipes(): void {
+    this.recipeService.getRandomRecipes(4).subscribe(recipes => {
+      this.recipes = recipes;
+    });
   }
 }

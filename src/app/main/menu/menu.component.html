@@ -5,14 +5,17 @@
         <span class="font-mainFont font-semibold text-2xl px-[2px] " *ngFor="let letter of menu">{{letter}}</span>
     </div>
     <!-- Navbar -->
+    <!-- Navbar -->
     <div class="p-1 mx-2">
-        <ul class="p-1" *ngFor="let menuName of menuList">
-            <li class="py-1  m-2 border-y rounded-lg border-color1 shadow-md shadow-color2 cursor-pointer 
-                hover:scale-105 transition duration-300 text-xl font-secondFont italic font-semibold text-color1">
-                {{menuName}}</li>
-
+        <ul class="p-1">
+            <li class="p-1 my-1 border-y rounded-lg border-color1 shadow-md shadow-color2 cursor-pointer 
+            hover:scale-105 transition duration-300 text-base font-secondFont italic font-semibold text-color1"
+                *ngFor="let menuName of menuList; let i=index" (click)="getMenuSearchedRecipesIds(menuName)">
+                {{menuName}}
+            </li>
         </ul>
     </div>
+
 </div>
 <!-- joke -->
 <div class="h-40  mx-3 mt-6 border-x border-color1 rounded-2xl w-full" *ngIf="randomJoke">

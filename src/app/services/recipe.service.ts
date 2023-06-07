@@ -10,11 +10,20 @@ export class RecipeService {
   randomRecipeUrl = 'https://api.spoonacular.com/recipes/random?'; // random recipes
   imageUrl: string = "https://spoonacular.com/cdn/ingredients_100x100/" // +Image.jpg
   recipeUrl: string = "https://api.spoonacular.com/recipes/"//Recipe with Id
-  searchRecipeUrl: string = 'https://api.spoonacular.com/recipes/autocomplete?number=9&query=';
+  searchRecipeUrl: string = 'https://api.spoonacular.com/recipes/autocomplete?number=9&query=';//search recipes
   randomJokeUrl: string = "https://api.spoonacular.com/food/jokes/random"//random jokes
+  menuSearchesUrl: string = "https://api.spoonacular.com/recipes/complexSearch"//menu searches
   apiKey: string = "2411f54aa6a44458a36089857f47254c"
 
   constructor(private http: HttpClient) { }
+
+  getMenuSearches(type: string): Observable<SearchedRecipe[]> {
+    return this.http.get<any>(`${this.menuSearchesUrl}?type=${type}&apiKey=${this.apiKey}`)
+      .pipe(
+        map(response => response.results.map((data: any) => this.mapSearchedRecipe(data)))
+      );
+  }
+
   // get searched recipes
   getSearchedRecipes(query: string): Observable<SearchedRecipe[]> {
     return this.http.get<any>(`${this.searchRecipeUrl}${query}&apiKey=${this.apiKey}`).pipe(
@@ -29,7 +38,7 @@ export class RecipeService {
   }
   // datatransform
   searchedRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
-
+  searchedMenuRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
 
   // getImage
   getImageUrl(imageName: string): Observable<string> {

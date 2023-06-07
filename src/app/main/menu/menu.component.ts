@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { randomJoke } from 'src/app/services/Irecipe';
+import { forkJoin } from 'rxjs';
+import { Recipe, SearchedRecipe, randomJoke } from 'src/app/services/Irecipe';
 import { RecipeService } from 'src/app/services/recipe.service';
 
 @Component({
@@ -10,14 +11,44 @@ import { RecipeService } from 'src/app/services/recipe.service';
 export class MenuComponent implements OnInit {
   // menu for Write
   menu: string[] = ["M", "E", "N", "U"];
-  menuList: string[] = ["AAAxeqccw", "BcwrcwrcwrcrcwBB", "CCCcwrc", "DccccccccccccDD"];
+  menuList: string[] = [
+    "main course",
+    "dessert",
+    "appetizer",
+    "salad",
+    "breakfast",
+    "soup",
+    "sauce",
+    "marinade",
+    "drink"
+  ];
+  Ids: SearchedRecipe[] = [];
+  searchedMenuRecipes: Recipe[] = [];
   randomJoke!: randomJoke;
 
   constructor(private recipeService: RecipeService) { }
 
   ngOnInit(): void {
+    this.searchedMenuRecipes = this.recipeService.searchedMenuRecipes.getValue();
     this.getRandomJoke();
   }
+
+  getMenuSearchedRecipesIds(type: string) {
+    this.recipeService.getMenuSearches(type).subscribe(response => {
+      this.Ids = response
+      this.getRecipesByIds();
+
+    });
+  }
+
+  getRecipesByIds() {
+    const recipeObservables = this.Ids.map(SearchedRecipe => this.recipeService.getRecipeById(SearchedRecipe.id));
+    forkJoin(recipeObservables).subscribe(recipes => {
+      this.searchedMenuRecipes = recipes;
+      this.recipeService.searchedMenuRecipes.next(this.searchedMenuRecipes); // Değişikliği bildir
+    });
+  }
+
 
   getRandomJoke(): void {
     this.recipeService.getRandomJoke().subscribe((response: randomJoke) => {

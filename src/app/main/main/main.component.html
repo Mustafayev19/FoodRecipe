@@ -1,61 +1,114 @@
-<div class=" w-full">
-
-
+<div class="w-full">
     <!-- cards -->
     <div class="grid grid-cols-2 mx-4">
-        <div class="m-4" *ngFor="let randomRecipe of recipes">
-            <!-- card -->
-            <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
-                <!-- image and features part -->
-                <div class="grid">
-                    <!-- row-1 -->
-                    <div>
-                        <!-- title -->
-                        <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
-                            {{randomRecipe.title}}
-                        </h2>
+        <ng-container *ngIf="searchedRecipes.length > 0; else randomRecipeLoop">
+            <div class="m-4" *ngFor="let recipe of searchedRecipes">
+                <!-- card -->
+                <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
+                    <!-- image and features part -->
+                    <div class="grid">
+                        <!-- row-1 -->
+                        <div>
+                            <!-- title -->
+                            <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
+                                {{recipe.title}}
+                            </h2>
+                        </div>
+                        <!-- row-2 -->
+                        <!-- image -->
+                        <div class="relative">
+                            <img class="rounded-lg object-cover h-full w-full" src="{{recipe.image}}">
+                            <a class="bg-white italic px-1 absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
+                                href="{{recipe.sourceUrl}}">Source url</a>
+                            <a class="bg-white italic px-1 absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
+                                [routerLink]="['/recipe-detail', recipe.id]">Detail Recipe</a>
+                        </div>
+                        <!-- row-3 -->
+                        <!-- details-part -->
+                        <div class="p-1 border-b-1 border-black">
+                            <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    Health score: {{recipe.healthScore}}
+                                </li>
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    {{recipe.cheap ? "cheap" : "expensive"}}
+                                </li>
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    Ready minute: {{recipe.readyInMinutes}}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <!-- row-2 -->
-                    <!-- image -->
-                    <div class="relative">
-                        <img class="rounded-lg object-cover h-full w-full" src="{{randomRecipe.image}}">
-                        <a class="bg-white px-1 absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                            href="{{randomRecipe.sourceUrl}}">Source url</a>
-                        <a class="bg-white px-1 absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                            [routerLink]="['/recipe-detail', randomRecipe.id]">Detail Recipe</a>
-                    </div>
-                    <!-- row-3 -->
-                    <!-- details-part -->
-                    <div class="p-1 border-b-1 border-black">
-                        <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
-                            <li
-                                class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                Health score: {{randomRecipe.healthScore}}
-                            </li>
-                            <li
-                                class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                {{randomRecipe.cheap ? "cheap" : "expensive"}}
-                            </li>
-                            <li
-                                class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                Ready minute: {{randomRecipe.readyInMinutes}}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- summary -->
-                <div class="h-40 italic from-color1 to-color2">
-                    <div class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1
-            scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
-                        <h2 class="text-center">Instraction</h2>
-
-                        <div class="text-base font-secondFont p-2 text-color1 text-justify"
-                            [innerHTML]="randomRecipe.instructions"></div>
-
+                    <!-- Instraction -->
+                    <div class="h-40 italic">
+                        <div
+                            class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
+                            <h2 class="text-center">Instruction</h2>
+                            <div class="text-base font-secondFont p-2 text-color1 text-justify"
+                                [innerHTML]="recipe.instructions"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </ng-container>
 
+        <ng-template #randomRecipeLoop>
+            <div class="m-4" *ngFor="let randomRecipe of randomRecipes">
+                <!-- card -->
+                <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
+                    <!-- image and features part -->
+                    <div class="grid">
+                        <!-- row-1 -->
+                        <div>
+                            <!-- title -->
+                            <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
+                                {{randomRecipe.title}}
+                            </h2>
+                        </div>
+                        <!-- row-2 -->
+                        <!-- image -->
+                        <div class="relative">
+                            <img class="rounded-lg object-cover h-full w-full" src="{{randomRecipe.image}}">
+                            <a class="bg-white px-1 italic absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
+                                href="{{randomRecipe.sourceUrl}}">Source url</a>
+                            <a class="bg-white px-1 italic absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
+                                [routerLink]="['/recipe-detail', randomRecipe.id]">Detail Recipe</a>
+                        </div>
+                        <!-- row-3 -->
+                        <!-- details-part -->
+                        <div class="p-1 border-b-1 border-black">
+                            <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    Health score: {{randomRecipe.healthScore}}
+                                </li>
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    {{randomRecipe.cheap ? "cheap" : "expensive"}}
+                                </li>
+                                <li
+                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
+                                    Ready minute: {{randomRecipe.readyInMinutes}}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Instraction -->
+                    <div class="h-40 italic ">
+                        <div
+                            class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
+                            <h2 class="text-center">Instruction</h2>
+
+                            <div class="text-base font-secondFont p-2 text-color1 text-justify"
+                                [innerHTML]="randomRecipe.instructions"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
     </div>
 </div>

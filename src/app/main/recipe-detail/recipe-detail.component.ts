@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { RecipeId } from 'src/app/services/Irecipe';
+import { Recipe } from 'src/app/services/Irecipe';
 import { RecipeService } from 'src/app/services/recipe.service';
 import { forkJoin } from 'rxjs';
 
@@ -10,7 +10,7 @@ import { forkJoin } from 'rxjs';
   styleUrls: ['./recipe-detail.component.css']
 })
 export class RecipeDetailComponent implements OnInit {
-  recipeById!: RecipeId;
+  recipeById!: Recipe;
   id!: number;
   imageUrls: string[] = [];
 

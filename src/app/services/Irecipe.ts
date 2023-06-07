@@ -6,25 +6,22 @@ export interface Recipe {
     cheap: boolean;
     healthScore: number;
     instructions: string;
-    summary: string;
     readyInMinutes: number;
     sourceUrl: string;
+    extendedIngredients: ExtendedIngredient[];
 }
 export interface ExtendedIngredient {
     name: string;
     image: string;
+    amount: number;
+}
+export interface randomJoke {
+    text: string
+}
+export interface SearchedRecipe {
+    id: number
+
 }
 
-export interface RecipeId {
-    title: string;
-    image: string;
-    Vegeterian: boolean;
-    vegan: boolean;
-    healthScore: number;
-    readyInMinutes: number;
-    sourceUrl: string;
-    price: string;
-    instructions: string;
-    extendedIngredients: ExtendedIngredient[];
-}
+
 

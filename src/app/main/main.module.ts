@@ -6,6 +6,7 @@ import { ServicesModule } from '../services/services.module';
 import { RecipeDetailComponent } from './recipe-detail/recipe-detail.component';
 import { MenuComponent } from './menu/menu.component';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -21,7 +22,8 @@ import { RouterModule } from '@angular/router';
   imports: [
     CommonModule,
     ServicesModule,
-    RouterModule
+    RouterModule,
+    FormsModule
   ],
   exports: [HeadLineComponent, MainComponent, MenuComponent, RecipeDetailComponent]
 })

@@ -4,9 +4,12 @@
 
     <!-- logo -->
     <div class="flex flex-none items-center justify-start mr-14">
-        <h1 class="text-2xl font-secondFont italic drop-shadow-md shadow-gray-600 text-lime-900 font-semibold ">
+        <h1 class="text-2xl font-secondFont italic drop-shadow-md shadow-gray-600 text-green-900 font-semibold cursor-pointer "
+            routerLink="/main">
             FoodReCiPe</h1>
         <img class="mb-2 " src=" assets/images/recipe-logo.svg">
+
+
     </div>
     <!-- images -->
     <div class="flex grow items-center justify-around ">
@@ -30,8 +33,9 @@
             <input class="w-64 p-2 h-max  bg-gradient-to-t from-color2 to-color3 rounded-xl
              focus:outline-none focus:ring-2 ring-color1 font-secondFont font-semibold 
              italic focus:scale-105 transition duration-300 z-10" autocomplete="off" placeholder="Search" type="text"
-                [class.searchInput]="search" [class.unSearchInput]="!search">
-            <img class="p-3 cursor-pointer " src="assets/images/search.svg" (click)="issearch()"
+                [class.searchInput]="search" [class.unSearchInput]="!search" #name
+                (keyup.enter)="getRecipeIds(name.value);">
+            <img class="p-3 cursor-pointer " src="assets/images/search.svg" (click)="issearch();"
                 [class.iconAnimation]="search" [class.unIconAnimation]="!search">
         </div>
     </div>

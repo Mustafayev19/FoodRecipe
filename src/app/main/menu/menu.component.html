@@ -1,7 +1,7 @@
 <!-- side -->
-<div class="min-w-full h-max mx-2 mt-4 border-x-2 border-color1 rounded-2xl text-center ">
+<div class=" min-w-full h-max mx-3 mt-4 border-x-2 border-color1 rounded-2xl text-center ">
     <!-- Menu -->
-    <div class="p-2 mx-2 border-b-2 border-color1 rounded-2xl ">
+    <div class="p-2  border-b-2 border-color1 rounded-2xl ">
         <span class="font-mainFont font-semibold text-2xl px-[2px] " *ngFor="let letter of menu">{{letter}}</span>
     </div>
     <!-- Navbar -->
@@ -13,7 +13,14 @@
 
         </ul>
     </div>
-
-
-
+</div>
+<!-- joke -->
+<div class="h-40  mx-3 mt-6 border-x border-color1 rounded-2xl w-full" *ngIf="randomJoke">
+    <div
+        class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
+        <h2 class="text-center text-xl font-mainFont font-base text-yellow-800  italic">Food Joke </h2>
+        <div class="text-base font-secondFont p-2 text-color1 text-justify">
+            <p>{{randomJoke.text}}</p>
+        </div>
+    </div>
 </div>

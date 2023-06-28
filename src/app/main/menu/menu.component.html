@@ -10,7 +10,7 @@
         <ul class="p-1">
             <li class="p-1 my-1 border-y rounded-lg border-color1 shadow-md shadow-color2 cursor-pointer 
             hover:scale-105 transition duration-300 text-base font-secondFont italic font-semibold text-color1"
-                *ngFor="let menuName of menuList; let i=index" (click)="getMenuSearchedRecipesIds(menuName)">
+                *ngFor="let menuName of menuList; " (click)="getMenuSearchedRecipesIds(menuName)">
                 {{menuName}}
             </li>
         </ul>

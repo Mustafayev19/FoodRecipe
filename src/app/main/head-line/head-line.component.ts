@@ -13,10 +13,13 @@ export class HeadLineComponent implements OnInit {
   searchedRecipes: Recipe[] = [];
   Ids: SearchedRecipe[] = [];
 
+
   constructor(private recipeService: RecipeService) { }
 
   ngOnInit() {
-    this.searchedRecipes = this.recipeService.searchedRecipes.getValue();
+    this.recipeService.searchedRecipes.subscribe((recipes: Recipe[]) => {
+      this.searchedRecipes = recipes;
+    });
   }
 
   getRecipeIds(query: string) {
@@ -24,6 +27,7 @@ export class HeadLineComponent implements OnInit {
       this.Ids = response;
       this.getRecipesByIds();
     });
+
   }
 
   getRecipesByIds() {
@@ -36,5 +40,6 @@ export class HeadLineComponent implements OnInit {
 
   issearch(): void {
     this.search = !this.search;
+
   }
 }

@@ -36,9 +36,17 @@ export class RecipeService {
       id: data.id,
     };
   }
-  // datatransform
   searchedRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
   searchedMenuRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
+
+
+  setSearchedRecipes(recipes: Recipe[]) {
+    this.searchedRecipes.next(recipes);
+  }
+
+  setSearchedMenuRecipes(recipes: Recipe[]) {
+    this.searchedMenuRecipes.next(recipes);
+  }
 
   // getImage
   getImageUrl(imageName: string): Observable<string> {

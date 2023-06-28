@@ -34,8 +34,8 @@
              focus:outline-none focus:ring-2 ring-color1 font-secondFont font-semibold 
              italic focus:scale-105 transition duration-300 z-10" autocomplete="off" placeholder="Search" type="text"
                 [class.searchInput]="search" [class.unSearchInput]="!search" #name
-                (keyup.enter)="getRecipeIds(name.value);">
-            <img class="p-3 cursor-pointer " src="assets/images/search.svg" (click)="issearch();"
+                (keyup.enter)="getRecipeIds(name.value); name.value=''">
+            <img class="p-3 cursor-pointer " src="assets/images/search.svg" (click)="issearch()"
                 [class.iconAnimation]="search" [class.unIconAnimation]="!search">
         </div>
     </div>

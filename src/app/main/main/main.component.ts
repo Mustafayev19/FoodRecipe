@@ -11,18 +11,16 @@ export class MainComponent implements OnInit {
   randomRecipes: Recipe[] = [];
   searchedRecipes: Recipe[] = [];
   searchedMenuRecipes: Recipe[] = [];
-  searchedRecipesSubscription: any;
-  searchedMenuRecipesSubscription: any;
 
   constructor(private recipeService: RecipeService) { }
 
   ngOnInit() {
     this.getRecipes();
-    this.recipeService.searchedRecipes.subscribe((recipes: Recipe[]) => {
-      this.searchedRecipes = recipes;
-    });
     this.recipeService.searchedMenuRecipes.subscribe((recipes: Recipe[]) => {
       this.searchedMenuRecipes = recipes;
+    });
+    this.recipeService.searchedRecipes.subscribe((recipes: Recipe[]) => {
+      this.searchedRecipes = recipes;
     });
   }
 
@@ -30,13 +28,5 @@ export class MainComponent implements OnInit {
     this.recipeService.getRandomRecipes(4).subscribe(recipes => {
       this.randomRecipes = recipes;
     });
-  }
-  ngOnDestroy() {
-    if (this.searchedRecipesSubscription) {
-      this.searchedRecipesSubscription.unsubscribe();
-    }
-    if (this.searchedMenuRecipes) {
-      this.searchedMenuRecipesSubscription.unsubscribe();
-    }
   }
 }

@@ -29,7 +29,9 @@ export class MenuComponent implements OnInit {
   constructor(private recipeService: RecipeService) { }
 
   ngOnInit(): void {
-    this.searchedMenuRecipes = this.recipeService.searchedMenuRecipes.getValue();
+    this.recipeService.searchedMenuRecipes.subscribe((recipes: Recipe[]) => {
+      this.searchedMenuRecipes = recipes;
+    });
     this.getRandomJoke();
   }
 
@@ -39,14 +41,16 @@ export class MenuComponent implements OnInit {
       this.getRecipesByIds();
 
     });
+    console.log
   }
 
   getRecipesByIds() {
     const recipeObservables = this.Ids.map(SearchedRecipe => this.recipeService.getRecipeById(SearchedRecipe.id));
     forkJoin(recipeObservables).subscribe(recipes => {
       this.searchedMenuRecipes = recipes;
-      this.recipeService.searchedMenuRecipes.next(this.searchedMenuRecipes); // Değişikliği bildir
+      this.recipeService.searchedMenuRecipes.next(this.searchedMenuRecipes);
     });
+
   }
 
 

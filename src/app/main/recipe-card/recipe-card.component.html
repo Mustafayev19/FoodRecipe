@@ -1,0 +1,77 @@
+<div
+  class="overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-2xl flex flex-col h-full"
+>
+  <div class="relative">
+    <a [routerLink]="['/recipe-detail', recipe.id]" class="block h-56 w-full">
+      <img
+        class="h-full w-full object-cover"
+        [src]="recipe.image"
+        [alt]="recipe.title"
+        loading="lazy"
+      />
+    </a>
+    <div
+      class="absolute bottom-2.5 left-2.5 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2"
+    >
+      <a
+        [routerLink]="['/recipe-detail', recipe.id]"
+        class="transform rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-md ring-1 ring-emerald-700 ring-opacity-50 transition-all hover:scale-105 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-1 focus:ring-offset-emerald-600"
+      >
+        View Details
+      </a>
+      <a
+        *ngIf="recipe.sourceUrl"
+        [href]="recipe.sourceUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="transform rounded-full bg-slate-700 px-3 py-1.5 text-sm font-semibold text-white shadow-md ring-1 ring-slate-800 ring-opacity-50 transition-all hover:scale-105 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-1 focus:ring-offset-slate-700"
+      >
+        Source
+      </a>
+    </div>
+  </div>
+
+  <div class="flex flex-grow flex-col p-4">
+    <h3
+      class="mb-2 text-lg font-bold text-slate-800 group-hover:text-emerald-600"
+    >
+      <a
+        [routerLink]="['/recipe-detail', recipe.id]"
+        title="{{ recipe.title }}"
+        class="line-clamp-2 hover:underline"
+      >
+        {{ recipe.title }}
+      </a>
+    </h3>
+
+    <div class="mb-3 mt-auto flex flex-wrap items-center gap-1">
+      <span
+        class="rounded-full bg-sky-100 px-2.5 py-1 text-sm font-medium text-sky-700"
+      >
+        Health: {{ recipe.healthScore }}/100
+      </span>
+      <span
+        class="rounded-full px-2.5 py-1 text-sm font-medium"
+        [ngClass]="
+          recipe.cheap
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'
+        "
+      >
+        {{ recipe.cheap ? "Budget-friendly" : "Premium" }}
+      </span>
+      <span
+        class="rounded-full bg-amber-100 px-2.5 py-1 text-sm font-medium text-amber-700"
+      >
+        {{ recipe.readyInMinutes }} mins
+      </span>
+    </div>
+
+    <div
+      *ngIf="recipe.instructions"
+      class="mb-1 text-sm text-slate-600 line-clamp-3"
+    >
+      {{ getInstructionSnippet(recipe.instructions, 120) }}
+    </div>
+  </div>
+</div>

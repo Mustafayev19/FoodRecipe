@@ -1,29 +1,34 @@
-<!-- side -->
-<div class=" min-w-full h-max mx-3 mt-4 border-x-2 border-color1 rounded-2xl text-center ">
-    <!-- Menu -->
-    <div class="p-2  border-b-2 border-color1 rounded-2xl ">
-        <span class="font-mainFont font-semibold text-2xl px-[2px] " *ngFor="let letter of menu">{{letter}}</span>
-    </div>
-    <!-- Navbar -->
-    <!-- Navbar -->
-    <div class="p-1 mx-2">
-        <ul class="p-1">
-            <li class="p-1 my-1 border-y rounded-lg border-color1 shadow-md shadow-color2 cursor-pointer 
-            hover:scale-105 transition duration-300 text-base font-secondFont italic font-semibold text-color1"
-                *ngFor="let menuName of menuList; " (click)="getMenuSearchedRecipesIds(menuName)">
-                {{menuName}}
-            </li>
-        </ul>
-    </div>
+<div class="p-4 items-start justify-start">
+  <a
+    routerLink="/main"
+    (click)="clearCurrentCategorySelection()"
+    class="left-0 flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+    aria-label="Go to main page and show all recipes"
+  >
+    <img class="mr-1 h-5 w-5" src="assets/icons/home.svg" alt="home icon" />
+    All Recipes / Home
+  </a>
 
-</div>
-<!-- joke -->
-<div class="h-40  mx-3 mt-6 border-x border-color1 rounded-2xl w-full" *ngIf="randomJoke">
-    <div
-        class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
-        <h2 class="text-center text-xl font-mainFont font-base text-yellow-800  italic">Food Joke </h2>
-        <div class="text-base font-secondFont p-2 text-color1 text-justify">
-            <p>{{randomJoke.text}}</p>
-        </div>
-    </div>
+  <h2
+    class="mt-6 mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500"
+  >
+    Categories
+  </h2>
+  <ul class="space-y-1">
+    <li *ngFor="let category of menuList">
+      <a
+        (click)="selectCategory(category)"
+        (keyup.enter)="selectCategory(category); $event.preventDefault()"
+        (keyup.space)="selectCategory(category); $event.preventDefault()"
+        tabindex="0"
+        role="button"
+        class="flex cursor-pointer items-center rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        [class.bg-slate-200]="isActiveCategory(category)"
+        [class.font-semibold]="isActiveCategory(category)"
+        [attr.aria-pressed]="isActiveCategory(category)"
+      >
+        <span class="text-sm capitalize">{{ category }}</span>
+      </a>
+    </li>
+  </ul>
 </div>

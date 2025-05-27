@@ -1,40 +1,97 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Recipe } from 'src/app/services/Irecipe';
+// recipe-detail.component.ts (Sadələşdirilmiş)
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RecipeService } from 'src/app/services/recipe.service';
-import { forkJoin } from 'rxjs';
+import { Subscription, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Recipe } from 'src/app/interfaces/Irecipe';
 
 @Component({
   selector: 'app-recipe-detail',
   templateUrl: './recipe-detail.component.html',
-  styleUrls: ['./recipe-detail.component.css']
+  // styleUrls: ['./recipe-detail.component.css']
 })
-export class RecipeDetailComponent implements OnInit {
-  recipeById!: Recipe;
-  id!: number;
-  imageUrls: string[] = [];
+export class RecipeDetailComponent implements OnInit, OnDestroy {
+  recipe: Recipe | null = null;
+  // ingredientImageUrls massivi və loadIngredientImages metodu artıq lazım deyil
+  isLoading: boolean = true;
+  errorLoading: string | null = null;
+
+  private subscriptions = new Subscription();
 
   constructor(
     private recipeService: RecipeService,
-    private activatedRoute: ActivatedRoute
-  ) { }
+    private activatedRoute: ActivatedRoute,
+    private sanitizer: DomSanitizer,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
-    this.getRecipeById(this.id);
+    const routeSub = this.activatedRoute.paramMap.subscribe((params) => {
+      const idParam = params.get('id');
+      if (idParam) {
+        const recipeId = +idParam;
+        if (isNaN(recipeId)) {
+          this.handleErrorState('Invalid Recipe ID format.');
+        } else {
+          this.getRecipeDetails(recipeId);
+        }
+      } else {
+        this.handleErrorState('Recipe ID not provided in URL.');
+      }
+    });
+    this.subscriptions.add(routeSub);
   }
 
-  getRecipeById(id: number): void {
-    this.recipeService.getRecipeById(id).subscribe(response => {
-      this.recipeById = response;
-      this.loadIngredientImages();
-    });
+  private handleErrorState(message: string): void {
+    this.isLoading = false;
+    this.errorLoading = message;
+    this.recipe = null;
   }
 
-  loadIngredientImages(): void {
-    const requests = this.recipeById.extendedIngredients.map(ingredient => this.recipeService.getImageUrl(ingredient.image));
-    forkJoin(requests).subscribe(imageUrls => {
-      this.imageUrls = imageUrls;
-    });
+  getRecipeDetails(id: number): void {
+    this.isLoading = true;
+    this.errorLoading = null;
+    this.recipe = null;
+
+    const recipeSub = this.recipeService
+      .getRecipeById(id)
+      .pipe(
+        catchError((err) => {
+          console.error('Error fetching recipe details:', err);
+          this.handleErrorState(
+            'Could not load recipe details. Please try again later.'
+          );
+          return of(null);
+        })
+      )
+      .subscribe((response) => {
+        if (response) {
+          this.recipe = response; // this.recipe.extendedIngredients[i].image artıq düzgün URL-i saxlayır
+        } else if (!this.errorLoading) {
+          this.handleErrorState('Recipe not found.');
+        }
+        this.isLoading = false; // Yüklənməni burada bitiririk
+      });
+    this.subscriptions.add(recipeSub);
+  }
+
+  // loadIngredientImages() metodu tamamilə silindi.
+
+  getSanitizedInstructions(): SafeHtml | string {
+    if (this.recipe && this.recipe.instructions) {
+      return this.sanitizer.bypassSecurityTrustHtml(this.recipe.instructions);
+    }
+    return 'No instructions provided for this recipe.';
+  }
+
+  // Placeholder şəklini yoxlamaq üçün köməkçi metod (HTML-də istifadə üçün)
+  isPlaceholderImage(imageUrl: string | null | undefined): boolean {
+    return imageUrl === 'assets/images/placeholder-ingredient.png';
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }

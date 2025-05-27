@@ -1,62 +1,54 @@
-import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
-import { Recipe, SearchedRecipe, randomJoke } from 'src/app/services/Irecipe';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RecipeService } from 'src/app/services/recipe.service';
 
 @Component({
   selector: 'menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css']
+  // styleUrls: ['./menu.component.css'] // Əgər bu fayl varsa və istifadə edirsinizsə, şərhdən çıxarın
 })
-export class MenuComponent implements OnInit {
-  // menu for Write
-  menu: string[] = ["M", "E", "N", "U"];
+export class MenuComponent implements OnInit, OnDestroy {
   menuList: string[] = [
-    "main course",
-    "dessert",
-    "appetizer",
-    "salad",
-    "breakfast",
-    "soup",
-    "sauce",
-    "marinade",
-    "drink"
+    "main course", "side dish", "dessert", "appetizer", "salad", "bread",
+    "breakfast", "soup", "beverage", "sauce", "marinade", "drink",
+    "fingerfood", "snack"
   ];
-  Ids: SearchedRecipe[] = [];
-  searchedMenuRecipes: Recipe[] = [];
-  randomJoke!: randomJoke;
 
-  constructor(private recipeService: RecipeService) { }
+  currentCategory: string | null = null;
+
+  constructor(private recipeService: RecipeService) {
+    this.menuList = [...new Set(this.menuList.map(item => item.toLowerCase()))].sort();
+  }
 
   ngOnInit(): void {
-    this.recipeService.searchedMenuRecipes.subscribe((recipes: Recipe[]) => {
-      this.searchedMenuRecipes = recipes;
-    });
-    this.getRandomJoke();
+    // Bu komponentin ngOnInit-də xüsusi bir yükləmə və ya abunəlik məntiqinə ehtiyacı yoxdur.
   }
 
-  getMenuSearchedRecipesIds(type: string) {
-    this.recipeService.getMenuSearches(type).subscribe(response => {
-      this.Ids = response
-      this.getRecipesByIds();
+  selectCategory(category: string): void {
+    const lowerCaseCategory = category.toLowerCase();
+    this.currentCategory = lowerCaseCategory;
 
-    });
-    console.log
+    // RecipeService-dəki getRecipesByCategory metodunu çağırırıq.
+    // Bu metod, seçilmiş kateqoriya üçün ilk səhifənin məlumatlarını yükləyəcək
+    // və nəticəni öz daxilindəki searchedMenuRecipes$ BehaviorSubject-inə ötürəcək.
+    // MainComponent bu dəyişikliyi qəbul edib göstərəcək.
+    this.recipeService.getRecipesByCategory(this.currentCategory);
   }
 
-  getRecipesByIds() {
-    const recipeObservables = this.Ids.map(SearchedRecipe => this.recipeService.getRecipeById(SearchedRecipe.id));
-    forkJoin(recipeObservables).subscribe(recipes => {
-      this.searchedMenuRecipes = recipes;
-      this.recipeService.searchedMenuRecipes.next(this.searchedMenuRecipes);
-    });
-
+  isActiveCategory(category: string): boolean {
+    return this.currentCategory === category.toLowerCase();
+  }
+  clearCurrentCategorySelection(): void {
+    this.currentCategory = null; // Yan panelde aktiv kateqoriya seçimini vizual olaraq ləğv edir
+    // routerLink="/main" artıq MainComponent-in yenidən yüklənməsini və
+    // loadInitialRecipes() metodunun çağırılmasını təmin edəcək.
+    // Bu da MainComponent-in currentDisplayMode-unu 'random'-a dəyişəcək.
+    // RecipeService-ə xüsusi bir "təmizləmə" siqnalı göndərməyə ehtiyac yoxdur,
+    // çünki MainComponent yeni vəziyyəti özü idarə edəcək.
+    console.log('Category selection cleared, navigating to main.');
   }
 
-
-  getRandomJoke(): void {
-    this.recipeService.getRandomJoke().subscribe((response: randomJoke) => {
-      this.randomJoke = response;
-    });
+  ngOnDestroy(): void {
+    // Bu komponentdə birbaşa idarə olunan RxJS abunəlikləri olmadığı üçün,
+    // ngOnDestroy içində xüsusi bir unsubscribe məntiqinə ehtiyac yoxdur.
   }
 }

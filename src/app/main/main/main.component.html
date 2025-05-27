@@ -1,175 +1,103 @@
-<div class="w-full">
+<div class="container mx-auto px-4 py-4">
+  <h1 class="text-center text-3xl font-bold text-slate-700 md:text-4xl">
+    {{ pageTitle }}
+  </h1>
 
-    <div>
-        <h1></h1>
+  <div
+    *ngIf="!isLoading && recipesToDisplay.length === 0"
+    class="flex min-h-[300px] flex-col items-center justify-center text-center"
+  >
+    <img
+      src="assets/icons/norecipe.svg"
+      alt="norecipe"
+      class="w-24 sm:w-28 md:w-36 lg:w-44 xl:w-52 h-auto"
+    />
+    <p class="mt-4 text-xl font-semibold text-slate-600">
+      {{
+        currentDisplayMode === "search" || currentDisplayMode === "menu"
+          ? "No Recipes Found"
+          : "No Recipes Currently Available"
+      }}
+    </p>
+    <p class="mt-2 text-slate-500 text-sm md:text-base">
+      {{
+        currentDisplayMode === "search" || currentDisplayMode === "menu"
+          ? "Try adjusting your search or selecting a different category."
+          : "Please check back later for new recipes!"
+      }}
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && recipesToDisplay.length > 0">
+    <div
+      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
+      <app-recipe-card
+        *ngFor="let recipe of recipesToDisplay"
+        [recipe]="recipe"
+      >
+      </app-recipe-card>
     </div>
-    <!-- cards -->
-    <div class="grid grid-cols-2 mx-4">
-        <ng-container *ngIf="searchedRecipes.length > 0 && !searchedMenuRecipes;else randomRecipeLoop">
-            <div class="m-4" *ngFor="let recipe of searchedRecipes">
-                <!-- card -->
-                <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
-                    <!-- image and features part -->
-                    <div class="grid">
-                        <!-- row-1 -->
-                        <div>
-                            <!-- title -->
-                            <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
-                                {{recipe.title}}
-                            </h2>
-                        </div>
-                        <!-- row-2 -->
-                        <!-- image -->
-                        <div class="relative">
-                            <img class="rounded-lg object-cover h-full w-full" src="{{recipe.image}}">
-                            <a class="bg-white italic px-1 absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                href="{{recipe.sourceUrl}}">Source url</a>
-                            <a class="bg-white italic px-1 absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                [routerLink]="['/recipe-detail', recipe.id]">Detail Recipe</a>
-                        </div>
-                        <!-- row-3 -->
-                        <!-- details-part -->
-                        <div class="p-1 border-b-1 border-black">
-                            <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Health score: {{recipe.healthScore}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    {{recipe.cheap ? "cheap" : "expensive"}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Ready minute: {{recipe.readyInMinutes}}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Instraction -->
-                    <div class="h-40 italic">
-                        <div
-                            class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
-                            <h2 class="text-center">Instruction</h2>
-                            <div class="text-base font-secondFont p-2 text-color1 text-justify"
-                                [innerHTML]="recipe.instructions"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+    <div
+      *ngIf="totalPages > 1"
+      class="mt-12 flex flex-col items-center space-y-4 sm:flex-row sm:justify-between sm:space-y-0"
+    >
+      <div class="text-sm text-slate-600">
+        Showing
+        <span class="font-semibold">{{
+          (currentPage - 1) * itemsPerPage + 1
+        }}</span>
+        to
+        <span class="font-semibold">{{
+          Math.min(currentPage * itemsPerPage, totalResults)
+        }}</span>
+        of <span class="font-semibold">{{ totalResults }}</span> results
+      </div>
+
+      <div
+        class="flex items-center space-x-1 rounded-md bg-slate-100 p-1 shadow-sm"
+      >
+        <button
+          (click)="onPageChange(currentPage - 1)"
+          [disabled]="currentPage === 1 || isLoading"
+          title="Previous Page"
+          class="rounded-md px-3 py-2 text-slate-600 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <img
+            class="h-5 w-5 -scale-x-100"
+            src="assets/icons/arrow.svg"
+            alt="arrow left"
+          />
+        </button>
+
+        <ng-container *ngFor="let page of getPaginationPages()">
+          <button
+            *ngIf="page !== '...'"
+            (click)="onPageChange(+page)"
+            [disabled]="isLoading"
+            [ngClass]="{
+              'bg-emerald-600 text-white shadow': +page === currentPage,
+              'hover:bg-slate-200 text-slate-700': +page !== currentPage
+            }"
+            class="rounded-md px-3 py-2 text-sm font-medium"
+          >
+            {{ page }}
+          </button>
+          <span *ngIf="page === '...'" class="px-3 py-2 text-sm text-slate-500"
+            >...</span
+          >
         </ng-container>
 
-        <ng-container *ngIf="searchedMenuRecipes;else randomRecipeLoop">
-            <div class="m-4" *ngFor="let recipe of searchedMenuRecipes">
-                <!-- card -->
-                <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
-                    <!-- image and features part -->
-                    <div class="grid">
-                        <!-- row-1 -->
-                        <div>
-                            <!-- title -->
-                            <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
-                                {{recipe.title}}
-                            </h2>
-                        </div>
-                        <!-- row-2 -->
-                        <!-- image -->
-                        <div class="relative">
-                            <img class="rounded-lg object-cover h-full w-full" src="{{recipe.image}}">
-                            <a class="bg-white px-1 italic absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                href="{{recipe.sourceUrl}}">Source url</a>
-                            <a class="bg-white px-1 italic absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                [routerLink]="['/recipe-detail', recipe.id]">Detail Recipe</a>
-                        </div>
-                        <!-- row-3 -->
-                        <!-- details-part -->
-                        <div class="p-1 border-b-1 border-black">
-                            <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Health score: {{recipe.healthScore}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    {{recipe.cheap ? "cheap" : "expensive"}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Ready minute: {{recipe.readyInMinutes}}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Instraction -->
-                    <div class="h-40 italic ">
-                        <div
-                            class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
-                            <h2 class="text-center">Instruction</h2>
-
-                            <div class="text-base font-secondFont p-2 text-color1 text-justify"
-                                [innerHTML]="recipe.instructions"></div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ng-container>
-
-        <ng-template #randomRecipeLoop>
-            <div class="m-4" *ngFor="let randomRecipe of randomRecipes">
-                <!-- card -->
-                <div class="border border-color1 border-x-2 px-1 overflow-hidden rounded-md grid grid-rows-auto">
-                    <!-- image and features part -->
-                    <div class="grid">
-                        <!-- row-1 -->
-                        <div>
-                            <!-- title -->
-                            <h2 class="text-center font-mainFont text-base font-semibold text-yellow-600 p-1">
-                                {{randomRecipe.title}}
-                            </h2>
-                        </div>
-                        <!-- row-2 -->
-                        <!-- image -->
-                        <div class="relative">
-                            <img class="rounded-lg object-cover h-full w-full" src="{{randomRecipe.image}}">
-                            <a class="bg-white px-1 italic absolute right-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                href="{{randomRecipe.sourceUrl}}">Source url</a>
-                            <a class="bg-white px-1 italic absolute left-1 bottom-1 text-sm font-semibold text-blue-950 border-2 border-blue-400 rounded-2xl"
-                                [routerLink]="['/recipe-detail', randomRecipe.id]">Detail Recipe</a>
-                        </div>
-                        <!-- row-3 -->
-                        <!-- details-part -->
-                        <div class="p-1 border-b-1 border-black">
-                            <ul class="flex justify-around gap-1 items-center text-center font-secondFont text-lg">
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Health score: {{randomRecipe.healthScore}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    {{randomRecipe.cheap ? "cheap" : "expensive"}}
-                                </li>
-                                <li
-                                    class="border-2 border-white font-semibold text-yellow-300 rounded-3xl p-1 bg-color1 text-sm">
-                                    Ready minute: {{randomRecipe.readyInMinutes}}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Instraction -->
-                    <div class="h-40 italic ">
-                        <div
-                            class="overflow-y-scroll scrollbar scrollbar-thumb-rounded scrollbar-w-1 scrollbar-corner-rounded-full scrollbar-track-transparent scrollbar-thumb-color1 max-h-full">
-                            <h2 class="text-center">Instruction</h2>
-
-                            <div class="text-base font-secondFont p-2 text-color1 text-justify"
-                                [innerHTML]="randomRecipe.instructions"></div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ng-template>
-
+        <button
+          (click)="onPageChange(currentPage + 1)"
+          [disabled]="currentPage === totalPages || isLoading"
+          title="Next Page"
+          class="rounded-md px-3 py-2 text-slate-600 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <img class="h-5 w-5" src="assets/icons/arrow.svg" alt="arrow right" />
+        </button>
+      </div>
     </div>
+  </div>
 </div>

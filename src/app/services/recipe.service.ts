@@ -1,114 +1,244 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, of } from 'rxjs';
-import { ExtendedIngredient, Recipe, SearchedRecipe, randomJoke } from './Irecipe';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import {
+  Recipe,
+  ExtendedIngredient, // Bu, mapToAppExtendedIngredient-də istifadə olunur
+  SpoonacularApiRecipe,
+  SpoonacularComplexSearchResponse,
+  PaginatedRecipesResponse,
+  SpoonacularApiExtendedIngredient, // Bu, mapToAppRecipe-də istifadə olunur
+} from '../interfaces/Irecipe'; // Import yolunuz './Irecipe' idi, əgər fərqlidirsə düzəldin
+
+import { environment } from '../../environments/environment'; // <--- API AÇARI ÜÇÜN BUNU ƏLAVƏ EDİRİK
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RecipeService {
-  randomRecipeUrl = 'https://api.spoonacular.com/recipes/random?'; // random recipes
-  imageUrl: string = "https://spoonacular.com/cdn/ingredients_100x100/" // +Image.jpg
-  recipeUrl: string = "https://api.spoonacular.com/recipes/"//Recipe with Id
-  searchRecipeUrl: string = 'https://api.spoonacular.com/recipes/autocomplete?number=9&query=';//search recipes
-  randomJokeUrl: string = "https://api.spoonacular.com/food/jokes/random"//random jokes
-  menuSearchesUrl: string = "https://api.spoonacular.com/recipes/complexSearch"//menu searches
-  apiKey: string = "2411f54aa6a44458a36089857f47254c"
+  // Bütün URL-lər artıq HTTPS istifadə edir, bu əladır.
+  private baseUrl = 'https://api.spoonacular.com/recipes';
 
-  constructor(private http: HttpClient) { }
+  // API açarı artıq environment faylından gələcək
+  // private apiKey: string = '2411f54aa6a44458a36089857f47254c'; // <--- BU SƏTRİ SİLİRİK
+  private apiKey: string = environment.spoonacularApiKey; // <--- BUNUNLA ƏVƏZ EDİRİK
 
-  getMenuSearches(type: string): Observable<SearchedRecipe[]> {
-    return this.http.get<any>(`${this.menuSearchesUrl}?type=${type}&apiKey=${this.apiKey}`)
+  public searchedRecipes$ =
+    new BehaviorSubject<PaginatedRecipesResponse | null>(null);
+  public searchedMenuRecipes$ =
+    new BehaviorSubject<PaginatedRecipesResponse | null>(null);
+  public randomRecipes$ = new BehaviorSubject<PaginatedRecipesResponse | null>(
+    null
+  );
+
+  constructor(private http: HttpClient) {}
+
+  // Başlıqdakı axtarış üçün
+  public searchRecipes(
+    query: string,
+    offset: number = 0,
+    pageSize: number = 12
+  ): void {
+    const params = new HttpParams()
+      .set('apiKey', this.apiKey) // Artıq environment-dən gələn açarı istifadə edəcək
+      .set('query', query)
+      .set('addRecipeInformation', 'true')
+      .set('fillIngredients', 'true')
+      .set('number', pageSize.toString())
+      .set('offset', offset.toString());
+
+    this.http
+      .get<SpoonacularComplexSearchResponse>(`${this.baseUrl}/complexSearch`, {
+        params,
+      })
       .pipe(
-        map(response => response.results.map((data: any) => this.mapSearchedRecipe(data)))
+        map(
+          (
+            response: SpoonacularComplexSearchResponse
+          ): PaginatedRecipesResponse => ({
+            recipes: response.results.map((apiRecipe) =>
+              this.mapToAppRecipe(apiRecipe)
+            ),
+            totalResults: response.totalResults,
+            query: query,
+            page: offset / pageSize + 1,
+            itemsPerPage: pageSize,
+          })
+        ),
+        catchError((error) => {
+          console.error('Error searching recipes:', error);
+          this.searchedRecipes$.next(null);
+          return of(null);
+        })
+      )
+      .subscribe((paginatedResponse) => {
+        if (paginatedResponse) {
+          this.searchedRecipes$.next(paginatedResponse);
+        }
+      });
+  }
+
+  // Menyudan kateqoriya seçimi üçün
+  public getRecipesByCategory(
+    category: string,
+    offset: number = 0,
+    pageSize: number = 12
+  ): void {
+    const params = new HttpParams()
+      .set('apiKey', this.apiKey) // Artıq environment-dən gələn açarı istifadə edəcək
+      .set('type', category.toLowerCase())
+      .set('addRecipeInformation', 'true')
+      .set('fillIngredients', 'true')
+      .set('number', pageSize.toString())
+      .set('offset', offset.toString());
+
+    this.http
+      .get<SpoonacularComplexSearchResponse>(`${this.baseUrl}/complexSearch`, {
+        params,
+      })
+      .pipe(
+        map(
+          (
+            response: SpoonacularComplexSearchResponse
+          ): PaginatedRecipesResponse => ({
+            recipes: response.results.map((apiRecipe) =>
+              this.mapToAppRecipe(apiRecipe)
+            ),
+            totalResults: response.totalResults,
+            category: category,
+            page: offset / pageSize + 1,
+            itemsPerPage: pageSize,
+          })
+        ),
+        catchError((error) => {
+          console.error(
+            `Error fetching recipes for category "${category}":`,
+            error
+          );
+          this.searchedMenuRecipes$.next(null);
+          return of(null);
+        })
+      )
+      .subscribe((paginatedResponse) => {
+        if (paginatedResponse) {
+          this.searchedMenuRecipes$.next(paginatedResponse);
+        }
+      });
+  }
+
+  // Təsadüfi/Əsas səhifə reseptləri üçün
+  public getRandomRecipes(pageSize: number = 12, offset: number = 0): void {
+    const params = new HttpParams()
+      .set('apiKey', this.apiKey) // Artıq environment-dən gələn açarı istifadə edəcək
+      .set('sort', 'popularity')
+      .set('sortDirection', 'desc')
+      .set('addRecipeInformation', 'true')
+      .set('fillIngredients', 'true')
+      .set('number', pageSize.toString())
+      .set('offset', offset.toString());
+
+    this.http
+      .get<SpoonacularComplexSearchResponse>(`${this.baseUrl}/complexSearch`, {
+        params,
+      })
+      .pipe(
+        map(
+          (
+            response: SpoonacularComplexSearchResponse
+          ): PaginatedRecipesResponse => ({
+            recipes: response.results.map((apiRecipe) =>
+              this.mapToAppRecipe(apiRecipe)
+            ),
+            totalResults: response.totalResults,
+            page: offset / pageSize + 1,
+            itemsPerPage: pageSize,
+          })
+        ),
+        catchError((error) => {
+          console.error('Error fetching featured recipes:', error);
+          this.randomRecipes$.next(null);
+          return of(null);
+        })
+      )
+      .subscribe((paginatedResponse) => {
+        if (paginatedResponse) {
+          this.randomRecipes$.next(paginatedResponse);
+        }
+      });
+  }
+
+  // ID ilə tək resept almaq
+  public getRecipeById(id: number): Observable<Recipe | null> {
+    const params = new HttpParams()
+      .set('apiKey', this.apiKey) // Artıq environment-dən gələn açarı istifadə edəcək
+      .set('includeNutrition', 'false');
+
+    return this.http
+      .get<SpoonacularApiRecipe>(`${this.baseUrl}/${id}/information`, {
+        params,
+      })
+      .pipe(
+        map((apiRecipe) => this.mapToAppRecipe(apiRecipe)),
+        catchError((error) => {
+          console.error(`Error fetching recipe by ID ${id}:`, error);
+          return of(null);
+        })
       );
   }
 
-  // get searched recipes
-  getSearchedRecipes(query: string): Observable<SearchedRecipe[]> {
-    return this.http.get<any>(`${this.searchRecipeUrl}${query}&apiKey=${this.apiKey}`).pipe(
-      map(response => response.map((data: any) => this.mapSearchedRecipe(data)))
-    );
-  }
-
-  private mapSearchedRecipe(data: any): SearchedRecipe {
-    return {
-      id: data.id,
-    };
-  }
-  searchedRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
-  searchedMenuRecipes: BehaviorSubject<Recipe[]> = new BehaviorSubject<Recipe[]>([]);
-
-
-  setSearchedRecipes(recipes: Recipe[]) {
-    this.searchedRecipes.next(recipes);
-  }
-
-  setSearchedMenuRecipes(recipes: Recipe[]) {
-    this.searchedMenuRecipes.next(recipes);
-  }
-
-  // getImage
-  getImageUrl(imageName: string): Observable<string> {
-    const imageUrl = `https://spoonacular.com/cdn/ingredients_100x100/${imageName}?apiKey=${this.apiKey}`;
-    return of(imageUrl);
-  }
-
-  // getRandomRecipes
-  getRandomRecipes(randomRecipeNumber: number): Observable<Recipe[]> {
-    return this.http.get<any>(`${this.randomRecipeUrl}&apiKey=${this.apiKey}&number=${randomRecipeNumber}`).pipe(
-      map(response => response.recipes.map((data: any) => this.mapToRandomRecipe(data)))
-    );
-  }
-  private mapToRandomRecipe(data: any): Recipe {
-    return {
-      id: data.id,
-      cheap: data.cheap,
-      healthScore: data.healthScore,
-      title: data.title,
-      sourceUrl: data.sourceUrl,
-      image: data.image,
-      instructions: data.instructions,
-      readyInMinutes: data.readyInMinutes,
-      extendedIngredients: data.extendedIngredients
-    };
-  }
-  // getRecipeById
-  getRecipeById(id: number): Observable<Recipe> {
-    return this.http.get<any>(`${this.recipeUrl}${id}/information?apiKey=${this.apiKey}`).pipe(
-      map((response: any) => this.mapToRecipe(response))
-    );
-  }
-
-
-  private mapToRecipe(data: any): Recipe {
-    const extendedIngredients: ExtendedIngredient[] = data.extendedIngredients.map((ingredient: any) => ({
-      name: ingredient.name,
-      image: ingredient.image,
-      amount: ingredient.amount
-    }));
-
-    const recipe: Recipe = {
-      cheap: data.cheap,
-      id: data.id,
-      title: data.title,
-      image: data.image,
-      healthScore: data.healthScore,
-      readyInMinutes: data.readyInMinutes,
-      sourceUrl: data.sourceUrl,
-      instructions: data.instructions,
-      extendedIngredients: extendedIngredients
-    };
-
-    return recipe;
-  }
-  getRandomJoke(): Observable<randomJoke> {
-    return this.http.get<any>(`${this.randomJokeUrl}?apiKey=${this.apiKey}`).pipe(map((response: any) => this.mapToRandomJoke(response)))
-  }
-  private mapToRandomJoke(data: any) {
-    const randomJoke: randomJoke = {
-      text: data.text
+  // İnqredient şəkil URL-i (API açarı olmadan və birbaşa string qaytarır)
+  public getIngredientImageUrl(
+    imageIdentifier: string | null | undefined
+  ): string {
+    const placeholder = 'assets/images/placeholder-ingredient.png';
+    if (!imageIdentifier) {
+      return placeholder;
     }
-    return randomJoke
+    if (
+      imageIdentifier.startsWith('http://') ||
+      imageIdentifier.startsWith('https://')
+    ) {
+      return imageIdentifier;
+    }
+    return `https://spoonacular.com/cdn/ingredients_100x100/${imageIdentifier}`;
+  }
+
+  // Mapper metodları
+  private mapToAppRecipe(apiRecipe: SpoonacularApiRecipe): Recipe {
+    return {
+      id: apiRecipe.id,
+      title: apiRecipe.title,
+      image: apiRecipe.image,
+      cheap: apiRecipe.cheap,
+      healthScore: apiRecipe.healthScore,
+      instructions: apiRecipe.instructions,
+      readyInMinutes: apiRecipe.readyInMinutes,
+      sourceUrl: apiRecipe.sourceUrl,
+      summary: apiRecipe.summary,
+      servings: apiRecipe.servings,
+      dishTypes: apiRecipe.dishTypes,
+      vegetarian: apiRecipe.vegetarian,
+      vegan: apiRecipe.vegan,
+      glutenFree: apiRecipe.glutenFree,
+      dairyFree: apiRecipe.dairyFree,
+      extendedIngredients:
+        apiRecipe.extendedIngredients?.map((apiIng) =>
+          this.mapToAppExtendedIngredient(apiIng)
+        ) || [],
+    };
+  }
+
+  private mapToAppExtendedIngredient(
+    apiIngredient: SpoonacularApiExtendedIngredient
+  ): ExtendedIngredient {
+    return {
+      id: apiIngredient.id,
+      name: apiIngredient.nameClean || apiIngredient.name,
+      image: this.getIngredientImageUrl(apiIngredient.image),
+      amount: apiIngredient.amount,
+      unit: apiIngredient.unit,
+      original: apiIngredient.original,
+    };
   }
 }

@@ -7,6 +7,7 @@ import { RecipeDetailComponent } from './recipe-detail/recipe-detail.component';
 import { MenuComponent } from './menu/menu.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { RecipeCardComponent } from './recipe-card/recipe-card.component';
 
 
 
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
     MenuComponent,
     MainComponent,
     RecipeDetailComponent,
+    RecipeCardComponent,
 
 
   ],

@@ -1,40 +1,109 @@
-<!-- details page -->
-<div class="flex justify-between gap-8 px-12" *ngIf="recipeById">
-    <!-- left side -->
-    <div class="flex-1">
-        <h2 class="p-1 font-secondFont text-center text-color1 text-xl">{{recipeById.title}}</h2>
-        <img class="w-max h-max rounded-2xl" src="{{recipeById.image}}">
-        <!-- other details -->
-        <div class="flex justify-between items-center gap-4 p-2 text-red-900 text-base font-secondFont">
-            <div class="p-1 rounded-full border-2 border-color1">Ready minutes: {{recipeById.readyInMinutes}}</div>
-            <div class="p-1 rounded-full border-2 border-color1">Health score: {{recipeById.healthScore}}</div>
-            <div class="p-1 rounded-full border-2 border-color1"><a href="{{recipeById.sourceUrl}}">Source Url</a></div>
+<div class="container mx-auto px-4 py-8 md:px-8 lg:px-12">
+
+    <div *ngIf="isLoading" class="flex min-h-[calc(100vh-10rem)] flex-col items-center justify-center text-center">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-solid border-emerald-600 border-t-transparent">
         </div>
-        <!-- instractions -->
-        <h2 class="m-1 p-1 font-secondFont text-start text-color1 text-xl ">Instructions</h2>
-        <p [innerHTML]="recipeById.instructions" class="text-justify p-1 font-secondFont  text-colorform text-xl "></p>
+        <p class="mt-4 text-lg font-semibold text-slate-600">Loading Recipe Details...</p>
+        <p class="text-sm text-slate-500">Please wait a moment.</p>
     </div>
-    <div class="">
-        <h2 class="flex justify-center items-center p-1 font-secondFont text-center text-color1 text-xl ">Extended
-            Ingredients
-        </h2>
-        <table class="  border-2 border-color1  border-spacing-1 mx-auto max-w-full  ">
-            <thead>
-                <tr>
-                    <th class="border-2 border-color1">Name</th>
-                    <th class="border-2 border-color1">Amount</th>
-                    <th class="border-2 border-color1">Image</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let ingredient of recipeById.extendedIngredients; let i = index"
-                    class="text-colorform text-xl">
-                    <td class="border-2 border-color1 text-center p-2 ">{{ ingredient.name }}</td>
-                    <td class="border-2 border-color1 text-center p-4 ">{{ ingredient.amount }}</td>
-                    <td class="border-2 border-color1 bg-white p-2  ">
-                        <img class="w-max h-max object-cover" [src]="imageUrls[i]">
-                    </td>
-            </tbody>
-        </table>
+
+    <div *ngIf="!isLoading && errorLoading" class="min-h-[calc(100vh-10rem)] py-10 text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <svg class="h-10 w-10 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+        </div>
+        <p class="text-2xl font-bold text-red-600">{{ errorLoading }}</p>
+        <a routerLink="/"
+            class="mt-8 inline-block rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            Go to Homepage
+        </a>
+    </div>
+
+    <div *ngIf="!isLoading && !errorLoading && recipe" class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+
+        <div class="w-full lg:w-2/3">
+            <h1 class="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+                {{ recipe.title }}
+            </h1>
+
+            <div class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span
+                    class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                    <svg class="mr-1.5 h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-4.75a.75.75 0 001.5 0V8.66l1.95 2.1a.75.75 0 101.1-1.02l-3.25-3.5a.75.75 0 00-1.1 0L6.4 9.74a.75.75 0 101.1 1.02l1.95-2.1v4.63z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    {{ recipe.readyInMinutes }} minutes
+                </span>
+                <span
+                    class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 ring-1 ring-inset ring-sky-200">
+                    <svg class="mr-1.5 h-4 w-4 text-sky-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path
+                            d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM3 10a7 7 0 1114 0 7 7 0 01-14 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Health Score: {{ recipe.healthScore }}
+                </span>
+                <a *ngIf="recipe.sourceUrl" [href]="recipe.sourceUrl" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-inset ring-slate-200 hover:bg-slate-200">
+                    <svg class="mr-1.5 h-4 w-4 text-slate-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path
+                            d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
+                        <path
+                            d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 005.656 5.656l3-3a4 4 0 00-.225-5.865z" />
+                    </svg>
+                    Original Source
+                </a>
+            </div>
+
+            <div class="mb-8 overflow-hidden rounded-xl shadow-2xl">
+                <img class="h-auto w-full object-cover max-h-[550px]" [src]="recipe.image" [alt]="recipe.title"
+                    loading="lazy">
+            </div>
+
+            <div
+                class="prose prose-lg max-w-none prose-slate prose-a:text-emerald-600 hover:prose-a:text-emerald-700 prose-headings:font-semibold prose-headings:text-slate-800">
+                <h2 class="!mb-3 !text-2xl">Instructions</h2>
+                <div *ngIf="recipe.instructions && recipe.instructions.length > 0"
+                    [innerHTML]="getSanitizedInstructions()"></div>
+                <p *ngIf="!recipe.instructions || recipe.instructions.length === 0" class="text-slate-500 italic">
+                    No specific instructions provided for this recipe.
+                </p>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/3">
+            <div class="sticky top-20 rounded-lg bg-slate-50 p-6 shadow-lg">
+                <h2 class="mb-5 text-2xl font-bold text-slate-800">Ingredients</h2>
+                <ul *ngIf="recipe.extendedIngredients && recipe.extendedIngredients.length > 0" class="space-y-3">
+                    <li *ngFor="let ingredient of recipe.extendedIngredients; let i = index"
+                        class="flex items-start space-x-3 rounded-md bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                            <img *ngIf="ingredient.image && !isPlaceholderImage(ingredient.image)"
+                                [src]="ingredient.image" [alt]="ingredient.name" class="h-8 w-8 rounded object-contain">
+                            <span *ngIf="!ingredient.image || isPlaceholderImage(ingredient.image)"
+                                class="text-emerald-500 text-lg">🛒</span>
+                        </div>
+                        <div>
+                            <span class="block font-semibold text-slate-700">{{ ingredient.name | titlecase }}</span>
+                            <span class="block text-sm text-slate-500">{{ ingredient.amount }} {{ ingredient.unit
+                                }}</span>
+                        </div>
+                    </li>
+                </ul>
+                <p *ngIf="!recipe.extendedIngredients || recipe.extendedIngredients.length === 0"
+                    class="text-slate-500 italic">
+                    No ingredients listed for this recipe.
+                </p>
+            </div>
+        </div>
     </div>
 </div>

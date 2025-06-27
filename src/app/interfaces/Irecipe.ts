@@ -1,13 +1,9 @@
-// src/app/services/Irecipe.ts
-
-// Measurement interfeysi
 export interface Measurement {
   amount: number;
   unitShort: string;
   unitLong: string;
 }
 
-// Spoonacular API-dən birbaşa gələn inqredient obyektinin strukturu
 export interface SpoonacularApiExtendedIngredient {
   id: number;
   aisle?: string;
@@ -26,7 +22,6 @@ export interface SpoonacularApiExtendedIngredient {
   };
 }
 
-// Spoonacular API-dən birbaşa gələn resept obyektinin strukturu
 export interface SpoonacularApiRecipe {
   id: number;
   title: string;
@@ -44,20 +39,18 @@ export interface SpoonacularApiRecipe {
   vegan?: boolean;
   glutenFree?: boolean;
   dairyFree?: boolean;
-  extendedIngredients: SpoonacularApiExtendedIngredient[]; // Yuxarıda təyin edilən SpoonacularApiExtendedIngredient istifadə olunur
+  extendedIngredients: SpoonacularApiExtendedIngredient[];
 }
 
-// Bizim tətbiqdaxili istifadə edəcəyimiz ExtendedIngredient interfeysi
 export interface ExtendedIngredient {
   id: number;
   name: string;
-  image: string | null; // İnqredient üçün tam şəkil URL-i (servisdə formalaşacaq)
+  image: string | null;
   amount: number;
   unit: string;
   original?: string;
 }
 
-// Bizim tətbiqdaxili istifadə edəcəyimiz Recipe interfeysi
 export interface Recipe {
   id: number;
   title: string;
@@ -74,20 +67,18 @@ export interface Recipe {
   vegan?: boolean;
   glutenFree?: boolean;
   dairyFree?: boolean;
-  extendedIngredients: ExtendedIngredient[]; // Yuxarıda təyin edilən ExtendedIngredient istifadə olunur
+  extendedIngredients: ExtendedIngredient[];
 }
 
-// Spoonacular-dan /recipes/complexSearch endpoint-indən gələn cavabın ümumi strukturu
 export interface SpoonacularComplexSearchResponse {
-  results: SpoonacularApiRecipe[]; // API-dən gələn xam SpoonacularApiRecipe obyektləri
+  results: SpoonacularApiRecipe[];
   offset: number;
   number: number;
   totalResults: number;
 }
 
-// MainComponent-in və servisin pagination üçün istifadə edəcəyi ümumi məlumat strukturu
 export interface PaginatedRecipesResponse {
-  recipes: Recipe[]; // Bizim standartlaşdırılmış Recipe interfeysimiz
+  recipes: Recipe[];
   totalResults: number;
   query?: string;
   category?: string;
@@ -95,10 +86,7 @@ export interface PaginatedRecipesResponse {
   itemsPerPage?: number;
 }
 
-// SearchedRecipe interfeysi (əgər hələ də /recipes/autocomplete istifadə olunursa)
 export interface SearchedRecipe {
   id: number;
   title?: string;
 }
-
-// RandomJoke interfeysi artıq qaldırılıb.

@@ -14,7 +14,6 @@ export class MainComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   currentDisplayMode: 'random' | 'search' | 'menu' = 'random';
 
-  // Pagination properties
   itemsPerPage: number = 12;
   currentPage: number = 1;
   totalResults: number = 0;
@@ -105,7 +104,7 @@ export class MainComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.recipeService.randomRecipes$.subscribe(
         (response: PaginatedRecipesResponse | null) => {
-          this.isLoading = true; // Will be set to false when data arrives or fails
+          this.isLoading = true;
           if (response) {
             this.recipesToDisplay = response.recipes;
             this.totalResults = response.totalResults;
@@ -128,8 +127,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(page: number | string): void {
-    // Səhifə nömrəsi string ('...') də ola bilər deyə, amma biz onu number-ə çevirəcəyik
-    const pageNumber = +page; // string-i number-ə çevirir; '...' NaN olacaq
+    const pageNumber = +page;
     if (
       isNaN(pageNumber) ||
       pageNumber < 1 ||
@@ -173,21 +171,19 @@ export class MainComponent implements OnInit, OnDestroy {
     return Math.ceil(this.totalResults / this.itemsPerPage);
   }
 
-  // Pagination üçün səhifə nömrələrini generasiya edən metod
   getPaginationPages(): (number | string)[] {
     const total = this.totalPages;
     const current = this.currentPage;
-    const delta = 1; // Cari səhifədən əvvəl və sonra göstəriləcək səhifə sayı (ümumilikdə 3-5 səhifə göstərmək üçün)
+    const delta = 1;
     const range = [];
     const rangeWithDots: (number | string)[] = [];
     let l: number | undefined;
 
     if (total <= 1) {
-      // Əgər cəmi 1 səhifə varsa və ya heç yoxdursa, boş array qaytar
       return [];
     }
 
-    range.push(1); // Həmişə ilk səhifəni əlavə et
+    range.push(1);
 
     let leftBound = Math.max(2, current - delta);
     let rightBound = Math.min(total - 1, current + delta);
@@ -195,18 +191,15 @@ export class MainComponent implements OnInit, OnDestroy {
     for (let i = leftBound; i <= rightBound; i++) {
       range.push(i);
     }
-    range.push(total); // Həmişə son səhifəni əlavə et (əgər 1-dən fərqlidirsə)
+    range.push(total);
 
-    // Unikal və sıralanmış səhifə nömrələrini al
     const uniqueSortedRange = [...new Set(range)].sort((a, b) => a - b);
 
     for (let i of uniqueSortedRange) {
       if (l !== undefined) {
         if (i - l === 2) {
-          // Arada bir səhifə buraxılıbsa
           rangeWithDots.push(l + 1);
         } else if (i - l > 2) {
-          // Arada birdən çox səhifə buraxılıbsa
           rangeWithDots.push('...');
         }
       }

@@ -10,11 +10,10 @@ import { Recipe } from 'src/app/interfaces/Irecipe';
 @Component({
   selector: 'app-recipe-detail',
   templateUrl: './recipe-detail.component.html',
-  // styleUrls: ['./recipe-detail.component.css']
+  styleUrls: ['./recipe-detail.component.css'],
 })
 export class RecipeDetailComponent implements OnInit, OnDestroy {
   recipe: Recipe | null = null;
-  // ingredientImageUrls massivi və loadIngredientImages metodu artıq lazım deyil
   isLoading: boolean = true;
   errorLoading: string | null = null;
 
@@ -68,16 +67,14 @@ export class RecipeDetailComponent implements OnInit, OnDestroy {
       )
       .subscribe((response) => {
         if (response) {
-          this.recipe = response; // this.recipe.extendedIngredients[i].image artıq düzgün URL-i saxlayır
+          this.recipe = response;
         } else if (!this.errorLoading) {
           this.handleErrorState('Recipe not found.');
         }
-        this.isLoading = false; // Yüklənməni burada bitiririk
+        this.isLoading = false;
       });
     this.subscriptions.add(recipeSub);
   }
-
-  // loadIngredientImages() metodu tamamilə silindi.
 
   getSanitizedInstructions(): SafeHtml | string {
     if (this.recipe && this.recipe.instructions) {
@@ -86,7 +83,6 @@ export class RecipeDetailComponent implements OnInit, OnDestroy {
     return 'No instructions provided for this recipe.';
   }
 
-  // Placeholder şəklini yoxlamaq üçün köməkçi metod (HTML-də istifadə üçün)
   isPlaceholderImage(imageUrl: string | null | undefined): boolean {
     return imageUrl === 'assets/images/placeholder-ingredient.png';
   }

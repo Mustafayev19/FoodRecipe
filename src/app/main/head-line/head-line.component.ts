@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { RecipeService } from 'src/app/services/recipe.service';
+import { Router } from '@angular/router'; // Router import edilir
 
 @Component({
   selector: 'head-line',
@@ -11,7 +11,7 @@ export class HeadLineComponent {
 
   mobileSearchActive = false;
 
-  constructor(private recipeService: RecipeService) {}
+  constructor(private router: Router) {} // RecipeService silinir, Router əlavə edilir
 
   performSearch(query: string): void {
     const trimmedQuery = query.trim();
@@ -19,7 +19,9 @@ export class HeadLineComponent {
       return;
     }
 
-    this.recipeService.searchRecipes(trimmedQuery);
+    // RecipeService çağırışı əvəzinə Router ilə yönləndirmə edilir
+    this.router.navigate(['/'], { queryParams: { search: trimmedQuery } });
+
     if (this.mobileSearchActive) {
       this.toggleMobileSearch();
     }

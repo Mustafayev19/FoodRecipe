@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router'; // Router import edilir
 import { RecipeService } from 'src/app/services/recipe.service';
 
 @Component({
@@ -8,6 +9,7 @@ import { RecipeService } from 'src/app/services/recipe.service';
 })
 export class MenuComponent {
   menuList: string[] = [
+    // ... menyu listiniz olduğu kimi qalır
     'main course',
     'side dish',
     'dessert',
@@ -26,7 +28,8 @@ export class MenuComponent {
 
   currentCategory: string | null = null;
 
-  constructor(private recipeService: RecipeService) {
+  constructor(private recipeService: RecipeService, private router: Router) {
+    // Router əlavə edilir
     this.menuList = [
       ...new Set(this.menuList.map((item) => item.toLowerCase())),
     ].sort();
@@ -36,7 +39,10 @@ export class MenuComponent {
     const lowerCaseCategory = category.toLowerCase();
     this.currentCategory = lowerCaseCategory;
 
-    this.recipeService.getRecipesByCategory(this.currentCategory);
+    // RecipeService çağırışı əvəzinə Router ilə yönləndirmə edilir
+    this.router.navigate(['/'], {
+      queryParams: { category: lowerCaseCategory },
+    });
   }
 
   isActiveCategory(category: string): boolean {

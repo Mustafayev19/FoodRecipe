@@ -4,15 +4,13 @@ import { MainComponent } from './main/main/main.component';
 import { RecipeDetailComponent } from './main/recipe-detail/recipe-detail.component';
 
 const routes: Routes = [
-  { path: "main", component: MainComponent },
-  { path: "recipe-detail/:id", component: RecipeDetailComponent },
-  { path: "", redirectTo: '/main', pathMatch: 'full' },
-  { path: "**", redirectTo: '/main' }
+  { path: '', component: MainComponent }, // "main" əvəzinə "" istifadə edirik
+  { path: 'recipe-detail/:id', component: RecipeDetailComponent },
+  { path: '**', redirectTo: '' }, // Səhv URL olarsa ana səhifəyə yönləndirir
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

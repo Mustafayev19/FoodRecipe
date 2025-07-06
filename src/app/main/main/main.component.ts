@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RecipeService } from 'src/app/services/recipe.service';
 import { Subscription } from 'rxjs';
 import { PaginatedRecipesResponse, Recipe } from 'src/app/interfaces/Irecipe';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-main',
@@ -23,107 +24,101 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  constructor(private recipeService: RecipeService) {}
+  constructor(
+    private recipeService: RecipeService,
+    private route: ActivatedRoute, // ActivatedRoute əlavə edilir
+    private router: Router // Router əlavə edilir
+  ) {}
 
   ngOnInit() {
-    this.loadInitialRecipes();
-
+    // URL-dəki parametrlərə (search, category, page) qulaq asırıq
     this.subscriptions.add(
-      this.recipeService.searchedRecipes$.subscribe(
-        (response: PaginatedRecipesResponse | null) => {
-          this.isLoading = true;
-          if (response) {
-            this.recipesToDisplay = response.recipes;
-            this.totalResults = response.totalResults;
-            this.currentPage = response.page || 1;
-            this.itemsPerPage = response.itemsPerPage || this.itemsPerPage;
-            this.lastSearchQuery = response.query || null;
-            this.pageTitle = response.query
-              ? `Search Results for "${response.query}"`
-              : 'Search Results';
-            this.currentDisplayMode = 'search';
-            if (response.recipes.length === 0) {
-              this.pageTitle = response.query
-                ? `No Results Found for "${response.query}"`
-                : 'No Results Found';
-            }
-          } else if (this.currentDisplayMode === 'search') {
-            this.recipesToDisplay = [];
-            this.totalResults = 0;
-            this.pageTitle = this.lastSearchQuery
-              ? `No Results Found for "${this.lastSearchQuery}"`
-              : 'No Search Results';
-          }
-          this.isLoading = false;
+      this.route.queryParams.subscribe((params) => {
+        this.isLoading = true;
+        const page = params['page'] ? +params['page'] : 1;
+        const offset = (page - 1) * this.itemsPerPage;
+
+        if (params['search']) {
+          this.currentDisplayMode = 'search';
+          this.lastSearchQuery = params['search'];
+          this.lastSelectedCategory = null; // Kateqoriyanı sıfırlayırıq
+          this.recipeService.searchRecipes(
+            params['search'],
+            offset,
+            this.itemsPerPage
+          );
+        } else if (params['category']) {
+          this.currentDisplayMode = 'menu';
+          this.lastSelectedCategory = params['category'];
+          this.lastSearchQuery = null; // Axtarışı sıfırlayırıq
+          this.recipeService.getRecipesByCategory(
+            params['category'],
+            offset,
+            this.itemsPerPage
+          );
+        } else {
+          this.currentDisplayMode = 'random';
+          this.lastSearchQuery = null;
+          this.lastSelectedCategory = null;
+          this.recipeService.getRandomRecipes(this.itemsPerPage, offset);
         }
-      )
+      })
     );
 
+    // Servisdən gələn cavablara qulaq asmağa davam edirik
+    this.listenForRecipeUpdates();
+  }
+
+  listenForRecipeUpdates(): void {
+    // Axtarış nəticələri
     this.subscriptions.add(
-      this.recipeService.searchedMenuRecipes$.subscribe(
-        (response: PaginatedRecipesResponse | null) => {
-          this.isLoading = true;
-          if (response) {
-            this.recipesToDisplay = response.recipes;
-            this.totalResults = response.totalResults;
-            this.currentPage = response.page || 1;
-            this.itemsPerPage = response.itemsPerPage || this.itemsPerPage;
-            this.lastSelectedCategory = response.category || null;
-            this.pageTitle = response.category
-              ? `Category: ${this.capitalizeFirstLetter(response.category)}`
-              : 'Category Results';
-            this.currentDisplayMode = 'menu';
-            if (response.recipes.length === 0) {
-              this.pageTitle = response.category
-                ? `No Recipes in ${this.capitalizeFirstLetter(
-                    response.category
-                  )}`
-                : 'No Recipes in this Category';
-            }
-          } else if (this.currentDisplayMode === 'menu') {
-            this.recipesToDisplay = [];
-            this.totalResults = 0;
-            this.pageTitle = this.lastSelectedCategory
-              ? `No Recipes in ${this.capitalizeFirstLetter(
-                  this.lastSelectedCategory
-                )}`
-              : 'No Category Results';
-          }
-          this.isLoading = false;
-        }
-      )
+      this.recipeService.searchedRecipes$.subscribe((response) => {
+        if (this.currentDisplayMode !== 'search' || !response) return;
+        this.handleResponse(
+          response,
+          `Search Results for "${response.query}"`,
+          `No Results Found for "${response.query}"`
+        );
+      })
+    );
+
+    // Kateqoriya nəticələri
+    this.subscriptions.add(
+      this.recipeService.searchedMenuRecipes$.subscribe((response) => {
+        if (this.currentDisplayMode !== 'menu' || !response) return;
+        this.handleResponse(
+          response,
+          `Category: ${this.capitalizeFirstLetter(response.category)}`,
+          `No Recipes in ${this.capitalizeFirstLetter(response.category)}`
+        );
+      })
+    );
+
+    // Təsadüfi reseptlər
+    this.subscriptions.add(
+      this.recipeService.randomRecipes$.subscribe((response) => {
+        if (this.currentDisplayMode !== 'random' || !response) return;
+        this.handleResponse(
+          response,
+          'Featured Recipes',
+          'No Featured Recipes Available'
+        );
+      })
     );
   }
 
-  loadInitialRecipes(page: number = 1): void {
-    this.isLoading = true;
-    this.currentDisplayMode = 'random';
-    this.currentPage = page;
-    const offset = (this.currentPage - 1) * this.itemsPerPage;
-
-    this.subscriptions.add(
-      this.recipeService.randomRecipes$.subscribe(
-        (response: PaginatedRecipesResponse | null) => {
-          this.isLoading = true;
-          if (response) {
-            this.recipesToDisplay = response.recipes;
-            this.totalResults = response.totalResults;
-            this.currentPage = response.page || 1;
-            this.itemsPerPage = response.itemsPerPage || this.itemsPerPage;
-            this.pageTitle = 'Featured Recipes';
-            if (response.recipes.length === 0 && this.currentPage === 1) {
-              this.pageTitle = 'No Featured Recipes Available';
-            }
-          } else if (this.currentDisplayMode === 'random') {
-            this.recipesToDisplay = [];
-            this.totalResults = 0;
-            this.pageTitle = 'Could Not Load Featured Recipes';
-          }
-          this.isLoading = false;
-        }
-      )
-    );
-    this.recipeService.getRandomRecipes(this.itemsPerPage, offset);
+  handleResponse(
+    response: PaginatedRecipesResponse,
+    successTitle: string,
+    noResultsTitle: string
+  ): void {
+    this.recipesToDisplay = response.recipes;
+    this.totalResults = response.totalResults;
+    this.currentPage = response.page || 1;
+    this.itemsPerPage = response.itemsPerPage || this.itemsPerPage;
+    this.pageTitle =
+      response.recipes.length > 0 ? successTitle : noResultsTitle;
+    this.isLoading = false;
   }
 
   onPageChange(page: number | string): void {
@@ -132,34 +127,21 @@ export class MainComponent implements OnInit, OnDestroy {
       isNaN(pageNumber) ||
       pageNumber < 1 ||
       pageNumber > this.totalPages ||
-      pageNumber === this.currentPage ||
-      this.isLoading
+      pageNumber === this.currentPage
     ) {
       return;
     }
 
-    this.currentPage = pageNumber;
-    const offset = (this.currentPage - 1) * this.itemsPerPage;
-
-    if (this.currentDisplayMode === 'search' && this.lastSearchQuery) {
-      this.recipeService.searchRecipes(
-        this.lastSearchQuery,
-        offset,
-        this.itemsPerPage
-      );
-    } else if (
-      this.currentDisplayMode === 'menu' &&
-      this.lastSelectedCategory
-    ) {
-      this.recipeService.getRecipesByCategory(
-        this.lastSelectedCategory,
-        offset,
-        this.itemsPerPage
-      );
-    } else if (this.currentDisplayMode === 'random') {
-      this.recipeService.getRandomRecipes(this.itemsPerPage, offset);
-    }
+    // Səhifəni dəyişmək üçün sadəcə URL-i yeniləyirik
+    // ngOnInit-dəki subscription dəyişikliyi tutub datanı avtomatik yeniləyəcək
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: pageNumber },
+      queryParamsHandling: 'merge', // Digər parametrləri (search/category) qoruyur
+    });
   }
+
+  // get totalPages(), getPaginationPages(), capitalizeFirstLetter() metodları olduğu kimi qalır...
 
   get totalPages(): number {
     if (
@@ -178,23 +160,17 @@ export class MainComponent implements OnInit, OnDestroy {
     const range = [];
     const rangeWithDots: (number | string)[] = [];
     let l: number | undefined;
-
     if (total <= 1) {
       return [];
     }
-
     range.push(1);
-
     let leftBound = Math.max(2, current - delta);
     let rightBound = Math.min(total - 1, current + delta);
-
     for (let i = leftBound; i <= rightBound; i++) {
       range.push(i);
     }
     range.push(total);
-
     const uniqueSortedRange = [...new Set(range)].sort((a, b) => a - b);
-
     for (let i of uniqueSortedRange) {
       if (l !== undefined) {
         if (i - l === 2) {
@@ -206,7 +182,6 @@ export class MainComponent implements OnInit, OnDestroy {
       rangeWithDots.push(i);
       l = i;
     }
-
     return rangeWithDots;
   }
 

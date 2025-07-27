@@ -169,7 +169,6 @@ export class RecipeService {
         ) || [],
     };
   }
-
   private mapToAppExtendedIngredient(
     apiIngredient: SpoonacularApiExtendedIngredient
   ): ExtendedIngredient {

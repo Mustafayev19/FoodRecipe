@@ -1,9 +1,6 @@
 [build]
-  # Bu sətir düzgündür
-  command = "node create-env.js && ng build"
-
+  command = "node create-env.js && ng build --configuration=production"
   publish = "dist/food-recipe"
-
 
 [[redirects]]
   from = "/*"

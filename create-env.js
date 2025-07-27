@@ -1,8 +1,6 @@
-// FAYL: create-env.js
 const fs = require("fs");
 const path = require("path");
 
-// Netlify-dakı mühit dəyişənini oxuyuruq
 const apiKey = process.env.NG_APP_SPOONACULAR_API_KEY;
 
 if (!apiKey) {
@@ -12,21 +10,17 @@ if (!apiKey) {
   process.exit(1);
 }
 
-// Build üçün environment faylının məzmununu hazırlayırıq
 const environmentFileContent = `
 export const environment = {
   production: true,
-  weatherApiUrl: 'https://api.spoonacular.com/recipes',
-  weatherApiKey: '${apiKey}'
+  sponacularApi: 'https://api.spoonacular.com/recipes',
+  spoonacularApiKey: '${apiKey}'
 };
 `;
 
-// Faylı yazacağımız yolu təyin edirik
 const targetPath = path.join(__dirname, "src/environments/environment.ts");
-
-// Faylı yaradırıq
 fs.writeFileSync(targetPath, environmentFileContent);
 
 console.log(
-  `Successfully created environment.ts file with API key for production.`
+  "Successfully created environment.ts file with API key for production."
 );

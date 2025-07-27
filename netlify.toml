@@ -1,0 +1,11 @@
+[build]
+  # Bu sətir düzgündür
+  command = "node create-env.js && ng build"
+
+  publish = "dist/food-recipe"
+
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

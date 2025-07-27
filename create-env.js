@@ -1,28 +1,32 @@
+// FAYL: create-env.js
 const fs = require("fs");
 const path = require("path");
 
-// Qovluğun mövcudluğunu yoxla, yoxdursa yarat
-const envDir = path.join(__dirname, "src/environments");
-
-if (!fs.existsSync(envDir)) {
-  fs.mkdirSync(envDir, { recursive: true });
-  console.log("src/environments qovluğu yaradıldı");
-}
-
-const apiKey = process.env.SPOON_API_KEY;
+// Netlify-dakı mühit dəyişənini oxuyuruq
+const apiKey = process.env.NG_APP_SPOONACULAR_API_KEY;
 
 if (!apiKey) {
-  console.error("API açarı daxil edilməyib!");
+  console.error(
+    "ERROR: Environment variable NG_APP_SPOONACULAR_API_KEY is not set."
+  );
   process.exit(1);
 }
 
-const content = `
+// Build üçün environment faylının məzmununu hazırlayırıq
+const environmentFileContent = `
 export const environment = {
   production: true,
-  spoonacularApiKey: '${apiKey}'
+  weatherApiUrl: 'https://api.spoonacular.com/recipes',
+  weatherApiKey: '${apiKey}'
 };
 `;
 
-fs.writeFileSync(path.join(envDir, "environment.ts"), content);
+// Faylı yazacağımız yolu təyin edirik
+const targetPath = path.join(__dirname, "src/environments/environment.ts");
 
-console.log("environment.ts Netlify üçün uğurla yaradıldı!");
+// Faylı yaradırıq
+fs.writeFileSync(targetPath, environmentFileContent);
+
+console.log(
+  `Successfully created environment.ts file with API key for production.`
+);

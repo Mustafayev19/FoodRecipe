@@ -1,4 +1,4 @@
-// create-env.js (Angular 20+ üçün DÜZGÜN versiya)
+// create-env.js (Yekun və Ən Stabil Versiya)
 const fs = require("fs");
 const path = require("path");
 
@@ -19,10 +19,20 @@ export const environment = {
 };
 `;
 
-// DİQQƏT: Hədəf faylı düzgün olaraq 'environment.ts'-dir
 const targetPath = path.join(__dirname, "src/environments/environment.ts");
+
+// === YENİ ƏLAVƏ OLUNAN HİSSƏ ===
+// Faylı yazacağımız qovluğun adını götürürük
+const targetDir = path.dirname(targetPath);
+
+// Həmin qovluğun mövcud olub-olmadığını yoxlayırıq
+if (!fs.existsSync(targetDir)) {
+  // Əgər mövcud deyilsə, onu özümüz yaradırıq
+  fs.mkdirSync(targetDir, { recursive: true });
+}
+// ===============================
+
+// İndi faylı arxayınlıqla yaza bilərik
 fs.writeFileSync(targetPath, environmentFileContent);
 
-console.log(
-  "Successfully created environment.ts file with API key for production."
-);
+console.log("Successfully created environment.ts file for production.");

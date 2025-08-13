@@ -1,3 +1,4 @@
+// create-env.js (Angular 20+ üçün DÜZGÜN versiya)
 const fs = require("fs");
 const path = require("path");
 
@@ -18,6 +19,7 @@ export const environment = {
 };
 `;
 
+// DİQQƏT: Hədəf faylı düzgün olaraq 'environment.ts'-dir
 const targetPath = path.join(__dirname, "src/environments/environment.ts");
 fs.writeFileSync(targetPath, environmentFileContent);
 
